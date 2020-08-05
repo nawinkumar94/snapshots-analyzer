@@ -9,4 +9,6 @@ Configure our aws using profile
   'aws configure --profile shotty'
 
 ## Run
-  'pipenv run python ec2-instance-list/ec2-instance-list.py'
+  'pipenv run python ec2-instance-list/ec2-instance-list.py list --project=snapshots-myproject'
+  'pipenv run python ec2-instance-list/ec2-instance-list.py stop --project=snapshots-myproject'
+  'pipenv run python ec2-instance-list/ec2-instance-list.py start --project=snapshots-myproject'
