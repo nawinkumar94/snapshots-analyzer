@@ -5,16 +5,17 @@ session=boto3.Session(profile_name='shotty')
 ec2=session.resource('ec2')
 
 def filter_list(project):
+    #Filter all the instances based on the instance tag value passed as a argument
     instances=[]
     if project:
+        #'project' is a key of the instances
         filters=[{'Name':'tag:project','Values':[project]}]
         instances=ec2.instances.filter(Filters=filters)
-        list(instances)
     else:
         instances=ec2.instances.all()
-
     return instances
 
+#'group' in click will group the commands
 @click.group()
 def instances():
     "Group all the instances command"
@@ -25,6 +26,8 @@ def list_instances(project):
     "List all the Ec2 instances"
     instances=filter_list(project)
     for data in instances:
+        #Replacing this tag  [{'Key': 'project', 'Value': 'snapshots-myproject'}] like
+        #{'project':snapshots-myproject'}
         tags={t['Key']:t['Value'] for t in data.tags or []}
         print(",".join((
             data.id,
