@@ -72,13 +72,15 @@ def list_volumes(project):
 @volumes.command('create_snapshot')
 @click.option("--project",default=None, help=" create snapshots for all the volumes based on project")
 def create_snapshots(project):
-    "Create snapshots for allwait_until_stopped(); the volumes in the instances"
+    "Create snapshots for all the volumes in the instances"
     instances=filter_list(project)
     for data in instances:
+        #instance need to be stopped while creating snapshots
         data.stop();
         print("Waiting untill the instance {0} is stopped".format(data.id))
         data.wait_until_stopped();
         for volume in data.volumes.all():
+            # This will prevent if we try to create snapshot for a volume which has pending snapshots already
             if has_pending_status(volume):
                 print("This volume {0} already has pending status snapshot".format(volume.id))
                 continue
@@ -86,6 +88,7 @@ def create_snapshots(project):
             volume.create_snapshot(Description="Created by snapshot analyzer")
             data.start();
             print("Waiting untill the instance {0} is started".format(data.id))
+            #Before stopping the another instance wait untill previous instance is started to achieve performance
             data.wait_until_running();
     print("All snapshots created!")
     return
@@ -118,7 +121,8 @@ def stop_instances(project):
     "Stop all the Ec2 instances for a specific project"
     instances=filter_list(project)
     for data in instances:
-        print('Stopping the instance of {}'.format(data.id))
+        print('Stopping the instance of {}'.format(data.id))\
+        #Added exception handling to catch the exception if we try to stop the instance in pending status
         try:
             data.stop()
         except botocore.exceptions.ClientError as exception:
@@ -134,6 +138,7 @@ def start_instances(project):
     instances=filter_list(project)
     for data in instances:
         print('Starting the instance of {}'.format(data.id))
+        #Added exception handline to catch exception if we try to start the instance in stopping status
         try:
             data.start()
         except botocore.exceptions.ClientError as exception:
