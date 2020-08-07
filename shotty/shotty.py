@@ -126,7 +126,7 @@ def stop_instances(project):
         try:
             data.stop()
         except botocore.exceptions.ClientError as exception:
-            print("Could not stop the instance {0} getting ".format(exception) + str(exception))
+            print("Could not stop the instance {0} getting ".format(data.id) + str(exception))
             continue
 
     return
@@ -142,7 +142,23 @@ def start_instances(project):
         try:
             data.start()
         except botocore.exceptions.ClientError as exception:
-            print("Could not start the instance {0} getting ".format(exception)+str(exception))
+            print("Could not start the instance {0} getting ".format(data.id)+str(exception))
+            continue
+
+    return
+
+@instances.command('reboot')
+@click.option("--project", default=None, help="Reboot all the instances based on project")
+def reboot_instances(project):
+    "Reboot all the Ec2 instances for a specific project"
+    instances=filter_list(project)
+    for data in instances:
+        print('Rebooting the instance of {}'.format(data.id))
+        #Added exception handline to catch exception if we try to reboot the stopped instance.
+        try:
+            data.reboot()
+        except botocore.exceptions.ClientError as exception:
+            print("Could not reboot the instance {0} getting ".format(data.id)+str(exception))
             continue
 
     return
